@@ -91,8 +91,9 @@ export const extractPrNumber = (cmd) => {
   if (prMergeMatch) return prMergeMatch[1];
   
   // 3. Fallback: ask gh
+  const root = getRepoRoot();
   try {
-    const result = execSync('gh pr view --json number --jq .number', { encoding: 'utf8', stdio: 'pipe' });
+    const result = execSync('gh pr view --json number --jq .number', { encoding: 'utf8', stdio: 'pipe', cwd: root });
     return result.trim() || null;
   } catch (e) {
     return null;
@@ -104,12 +105,13 @@ export const extractPrNumber = (cmd) => {
  */
 export const resolvePrHead = (prNumber, repo = null) => {
   if (!prNumber) return null;
-  
+  const root = getRepoRoot();
   try {
     const args = repo ? ['pr', 'view', prNumber, '--repo', repo] : ['pr', 'view', prNumber];
-    const result = execSync(`gh ${args.join(' ')} --json headRefOid --jq .headRefOid`, { 
-      encoding: 'utf8', 
-      stdio: 'pipe' 
+    const result = execSync(`gh ${args.join(' ')} --json headRefOid --jq .headRefOid`, {
+      encoding: 'utf8',
+      stdio: 'pipe',
+      cwd: root
     });
     return result.trim() || null;
   } catch (e) {
@@ -121,8 +123,9 @@ export const resolvePrHead = (prNumber, repo = null) => {
  * Get current git HEAD SHA
  */
 export const getCurrentSha = () => {
+  const root = getRepoRoot();
   try {
-    return execSync('git rev-parse HEAD', { encoding: 'utf8', stdio: 'pipe' }).trim();
+    return execSync('git rev-parse HEAD', { encoding: 'utf8', stdio: 'pipe', cwd: root }).trim();
   } catch (e) {
     return null;
   }
@@ -132,8 +135,9 @@ export const getCurrentSha = () => {
  * Get current branch name
  */
 export const getCurrentBranch = () => {
+  const root = getRepoRoot();
   try {
-    return execSync('git branch --show-current', { encoding: 'utf8', stdio: 'pipe' }).trim();
+    return execSync('git branch --show-current', { encoding: 'utf8', stdio: 'pipe', cwd: root }).trim();
   } catch (e) {
     return null;
   }
@@ -144,9 +148,10 @@ export const getCurrentBranch = () => {
  */
 export const getRepoRoot = () => {
   try {
-    return execSync('git rev-parse --show-toplevel', { encoding: 'utf8', stdio: 'pipe' }).trim();
+    const root = execSync('git rev-parse --show-toplevel', { encoding: 'utf8', stdio: 'pipe' }).trim();
+    return root || null;
   } catch (e) {
-    return process.cwd();
+    return null;
   }
 };
 
@@ -154,8 +159,9 @@ export const getRepoRoot = () => {
  * Run gh command and return output
  */
 export const runGh = (args) => {
+  const root = getRepoRoot();
   try {
-    return execSync(`gh ${args}`, { encoding: 'utf8', stdio: 'pipe' }).trim();
+    return execSync(`gh ${args}`, { encoding: 'utf8', stdio: 'pipe', cwd: root }).trim();
   } catch (e) {
     return null;
   }

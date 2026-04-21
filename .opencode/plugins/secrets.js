@@ -37,10 +37,19 @@ export const SecretsPlugin = async ({ project, client, $, directory, worktree })
       } else {
         const fileMatch = command.match(/-F\s+(\S+)/);
         if (fileMatch) {
+          const filePath = fileMatch[1];
+          // Validate path doesn't contain directory traversal
+          if (filePath.includes('..')) {
+            throw new Error(`BLOCKED: Invalid file path - directory traversal not allowed.`);
+          }
+          // Validate it doesn't start with / (absolute path from root)
+          if (filePath.startsWith('/')) {
+            throw new Error(`BLOCKED: Absolute paths not allowed. Use relative path.`);
+          }
           try {
-            commitMsg = require('fs').readFileSync(fileMatch[1], 'utf8');
+            commitMsg = require('fs').readFileSync(filePath, 'utf8');
           } catch (e) {
-            return;
+            throw new Error(`BLOCKED: Could not read commit message file: ${filePath}`);
           }
         }
       }

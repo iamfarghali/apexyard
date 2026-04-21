@@ -5,7 +5,7 @@
  * Based on .claude/hooks/require-design-review-for-ui.sh
  */
 
-import { isMergeCommand, extractPrNumber, getRepoRoot, getCurrentSha, fileExists, isMergeCommand } from './lib.js';
+import { isMergeCommand, extractPrNumber, getRepoRoot, getCurrentSha, fileExists, runGh } from './lib.js';
 
 const path = require('path');
 
@@ -24,14 +24,17 @@ const UI_PATTERNS = [
 /**
  * Check if PR has UI changes
  */
-const hasUiChanges = async () => {
+const hasUiChanges = async (prNumber, repo = null) => {
   try {
-    // Get the diff for the PR
-    const result = require('child_process').execSync('git diff --name-only HEAD~1 HEAD', { 
-      encoding: 'utf8', 
-      stdio: 'pipe' 
+    // Use gh pr diff for proper PR diff instead of HEAD~1
+    const args = repo ? ['pr', 'diff', prNumber, '--repo', repo, '--name-only'] : ['pr', 'diff', prNumber, '--name-only'];
+    const result = require('child_process').execSync(`gh ${args.join(' ')}`, {
+      encoding: 'utf8',
+      stdio: 'pipe'
     });
+    
     const files = result.trim().split('\n').filter(f => f);
+    if (files.length === 0) return false;
     
     for (const file of files) {
       for (const pattern of UI_PATTERNS) {
@@ -40,6 +43,8 @@ const hasUiChanges = async () => {
     }
     return false;
   } catch (e) {
+    // Could not get diff - allow merge (not a hard block)
+    console.error('Warning: Could not detect UI changes:', e.message);
     return false;
   }
 };
@@ -53,8 +58,13 @@ export const DesignReviewPlugin = async ({ project, client, $, directory, worktr
       const prNumber = extractPrNumber(command);
       if (!prNumber) return;
       
+      // Extract repo from command
+      let repo = null;
+      const repoMatch = command.match(/--repo["']?\s*["']?([^"']+)["']?/);
+      if (repoMatch) repo = repoMatch[1];
+      
       // Check if there are UI changes
-      const hasUi = await hasUiChanges();
+      const hasUi = await hasUiChanges(prNumber, repo);
       if (!hasUi) return;
       
       const repoRoot = getRepoRoot();

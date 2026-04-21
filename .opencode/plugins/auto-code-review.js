@@ -24,11 +24,15 @@ export const AutoCodeReviewPlugin = async ({ project, client, $, directory, work
       
       // Extract PR URL from output
       const outputText = output.result || '';
-      const prUrlMatch = outputText.match(/https:\/\/github\.com\/[^\/]+\/[^\/]+\/pull\/[0-9]+/);
-      if (!prUrlMatch) return;
+      // More robust regex - match github.com URLs specifically
+      const prUrlMatch = outputText.match(/https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+\/pull\/(\d+)/);
+      if (!prUrlMatch) {
+        console.error('Warning: Could not extract PR URL from gh pr create output');
+        return;
+      }
       
       const prUrl = prUrlMatch[0];
-      const prNumber = prUrl.match(/[0-9]+$/)?.[0] || null;
+      const prNumber = prUrlMatch[1];
       
       if (!prNumber) return;
       

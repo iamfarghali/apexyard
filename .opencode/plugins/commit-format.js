@@ -29,7 +29,7 @@ export const CommitFormatPlugin = async ({ project, client, $, directory, worktr
           try {
             commitMsg = require('fs').readFileSync(fileMatch[1], 'utf8');
           } catch (e) {
-            return;
+            throw new Error(`BLOCKED: Could not read commit message file: ${fileMatch[1]}`);
           }
         }
       }

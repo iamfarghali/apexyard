@@ -45,11 +45,11 @@ export const RedCiPlugin = async ({ project, client, $, directory, worktree }) =
       try {
         const checkData = JSON.parse(checks);
         
-        // Check for failures
-        const hasFailure = checkData.status?.some(s => 
+        // Check for failures - gh pr checks --json returns array under 'checks' key
+        const hasFailure = checkData.checks?.some(s => 
           s.conclusion === 'FAILURE' || s.conclusion === 'TIMED_OUT'
         );
-        const hasPending = checkData.status?.some(s => 
+        const hasPending = checkData.checks?.some(s => 
           s.status === 'IN_PROGRESS' || s.status === 'QUEUED' || s.status === 'PENDING'
         );
         

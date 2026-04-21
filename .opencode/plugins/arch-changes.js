@@ -14,18 +14,20 @@ const DEFAULT_ARCH_PATTERNS = [
   /\.tfvars$/,                       // Terraform variables
   /(^|\/)docker-compose.*\.ya?ml$/,   // Docker Compose
   /(^|\/)Dockerfile$/,                // Dockerfiles
-  /^\.github\/workflows\//             // GitHub Actions
+  /(\.github\/workflows\/|$)/          // GitHub Actions (match at start or end of path segment)
 ];
 
 /**
  * Check if any staged file matches architecture patterns
  */
 const hasArchChanges = async (patterns) => {
+  const root = getRepoRoot();
   try {
     // Get list of staged files
-    const result = require('child_process').execSync('git diff --cached --name-only', { 
-      encoding: 'utf8', 
-      stdio: 'pipe' 
+    const result = require('child_process').execSync('git diff --cached --name-only', {
+      encoding: 'utf8',
+      stdio: 'pipe',
+      cwd: root
     });
     const files = result.trim().split('\n').filter(f => f);
     
@@ -44,10 +46,13 @@ const hasArchChanges = async (patterns) => {
  * Check if staged files include an AgDR
  */
 const hasAgdrInStaged = () => {
+  const root = getRepoRoot();
   try {
-    const result = require('child_process').execSync('git diff --cached --name-only', { 
-      encoding: 'utf8', 
-      stdio: 'pipe' 
+    const result = require('child_process').execSync('git diff --cached --name-only', {
+      encoding: 'utf8',
+      stdio: 'pipe',
+      cwd: root
+    }); 
     });
     const files = result.trim().split('\n').filter(f => f);
     return files.some(f => f.includes('docs/agdr/AgDR-') && f.includes('migration'));

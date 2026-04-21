@@ -17,10 +17,11 @@ export const PrePushPlugin = async ({ project, client, $, directory, worktree })
       
       // This is a warning hook - use the client to inject a reminder
       if (client && client.session) {
-        await client.session.prompt({
-          body: {
-            role: 'user',
-            content: `PRE-PUSH REMINDER: Ensure these passed locally before pushing:
+        try {
+          await client.session.prompt({
+            body: {
+              role: 'user',
+              content: `PRE-PUSH REMINDER: Ensure these passed locally before pushing:
 
   [ ] Lint                  (e.g. npm run lint)
   [ ] Type check            (e.g. npm run typecheck)
@@ -29,8 +30,12 @@ export const PrePushPlugin = async ({ project, client, $, directory, worktree })
   [ ] Framework validation  (e.g. sam validate, terraform validate)
 
 This is a reminder - push was allowed.`
-          }
-        });
+            }
+          });
+        } catch (e) {
+          // API failure shouldn't block push
+          console.error('Warning: Could not show pre-push reminder:', e.message);
+        }
       }
     }
   };

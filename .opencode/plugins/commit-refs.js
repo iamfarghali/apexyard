@@ -46,7 +46,6 @@ export const CommitRefsPlugin = async ({ project, client, $, directory, worktree
       // Find issue references
       const refPatterns = [
         /Closes\s+#(\d+)/gi,
-        /Closes\s+#(\d+)/gi,
         /Fixes\s+#(\d+)/gi,
         /Resolves\s+#(\d+)/gi,
         /Refs\s+#(\d+)/gi,

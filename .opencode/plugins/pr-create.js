@@ -21,10 +21,12 @@ export const PrCreatePlugin = async ({ project, client, $, directory, worktree }
       const errors = [];
       const repoRoot = getRepoRoot();
       
-      // Extract --title
+      // Extract --title - handle various quote styles
       let title = '';
-      const titleMatch = command.match(/--title["']?\s*["']?([^"']+)["']?/);
-      if (titleMatch) title = titleMatch[1].trim();
+      // Match --title "value", --title 'value', --title=value, --title="value", or --title='value'
+      const titleMatch = command.match(/--title=(["']?)(.+?)\1(?:\s|$)/) || 
+                       command.match(/--title\s+(["'])(.+?)\1/);
+      if (titleMatch) title = titleMatch[2].trim();
       
       // Validate PR title format
       if (title && !PR_TITLE_REGEX.test(title)) {
