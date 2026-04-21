@@ -4,6 +4,9 @@
   "permission": {
     "skill": {
       "*": "allow"
+    },
+    "task": {
+      "*": "allow"
     }
   }
 }
