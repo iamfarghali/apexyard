@@ -7,9 +7,20 @@ Short version of the setup flow. For the full walkthrough (directory layout, dai
 ## Prerequisites
 
 - A GitHub account and an org you can fork into
-- [Claude Code](https://claude.com/claude-code) installed
+- [Claude Code](https://claude.com/claude-code) **or** [OpenCode](https://opencode.ai) installed
 - [GitHub CLI (`gh`)](https://cli.github.com) installed (optional but recommended)
-- Basic familiarity with Claude Code's `CLAUDE.md` system
+- Basic familiarity with the agent's `CLAUDE.md` system
+
+### Dual Runtime Support
+
+ApexYard works with **both** Claude Code and OpenCode:
+
+| Runtime | Auto-Discover Skills | Hooks | Session State |
+|---------|---------------------|-------|--------------|
+| Claude Code | Yes (`.claude/skills/`) | `.claude/hooks/*.sh` | `.claude/session/` |
+| OpenCode | Yes (`.claude/skills/`) | `.opencode/plugins/*.js` | `.claude/session/` (shared) |
+
+Both runtimes share the same skills and session state — no extra configuration needed.
 
 ---
 
@@ -192,9 +203,13 @@ After setup, Claude Code will:
 
 ## Troubleshooting
 
-### Claude Code doesn't seem to know about the stack
+### The agent doesn't seem to know about the stack
 
-Make sure you're running Claude Code from inside your fork of apexyard (the ops repo). Claude Code reads `CLAUDE.md` automatically from the working directory's root — if you're one level deep (e.g. inside `workspace/<project>/`) it picks up the project's own `CLAUDE.md` instead.
+Make sure you're running Claude Code or OpenCode from inside your fork of apexyard (the ops repo). The agent reads `CLAUDE.md` automatically from the working directory's root — if you're one level deep (e.g. inside `workspace/<project>/`) it picks up the project's own `CLAUDE.md` instead.
+
+### Using OpenCode
+
+For OpenCode users: plugins in `.opencode/plugins/` are auto-loaded. No additional configuration needed beyond having the `.opencode/opencode.json` file present. Skills from `.claude/skills/` are auto-discovered.
 
 ### Roles aren't being applied correctly
 

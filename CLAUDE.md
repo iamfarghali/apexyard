@@ -216,6 +216,36 @@ The hooks, agents, and skills are picked up automatically by Claude Code when th
 
 See `docs/getting-started.md` for the integration model — including how to install the `.claude/` layer alongside the rest of the stack.
 
+---
+
+## OPENSEARCH INTEGRATION
+
+ApexYard also supports **OpenCode** (`opencode.ai`). The same 33 skills and session state work on OpenCode without modification (they're auto-discovered from `.claude/skills/`). For hook enforcement, ApexYard provides parallel JavaScript plugins:
+
+| Layer | Path | Purpose |
+|-------|------|---------|
+| Plugins | `.opencode/plugins/` | 18 JavaScript plugins for OpenCode hook equivalent enforcement |
+| Config | `.opencode/opencode.json` | Plugin loading configuration |
+| Skills | `.claude/skills/` | **Works as-is** — OpenCode auto-discovers these |
+
+### Dual-Runtime Support
+
+ApexYard runs on **both** Claude Code (shell hooks in `.claude/hooks/`) and OpenCode (JS plugins in `.opencode/plugins/`). Both use the same session state at `.claude/session/`.
+
+| Runtime | Hooks | Skills | Session State |
+|---------|------|--------|--------------|
+| Claude Code | `.claude/hooks/*.sh` | `.claude/skills/*/SKILL.md` | `.claude/session/` |
+| OpenCode | `.opencode/plugins/*.js` | `.claude/skills/*/SKILL.md` (auto-discovered) | `.claude/session/` (shared) |
+
+To use with OpenCode:
+1. Install OpenCode (`curl -fsSL https://opencode.ai/install | bash`)
+2. OpenCode auto-loads plugins from `.opencode/plugins/` (configured in `.opencode/opencode.json`)
+3. Skills are auto-discovered — no configuration needed
+
+See `docs/getting-started.md` for detailed setup instructions for each runtime.
+
+---
+
 ## CI/CD PIPELINES
 
 Reusable GitHub Actions workflows live at `golden-paths/pipelines/`:
